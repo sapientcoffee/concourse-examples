@@ -1,0 +1,91 @@
+---
+jobs: 
+
+- name: generate-version
+  plan:
+  - put: version-file
+    params: { bump: patch }
+
+- name: create-file
+  plan:
+  - get: version-file
+    passed: 
+    - generate-version
+    trigger: true
+  - task: create-file
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: czero/rootfs
+      inputs:
+      - name: version-file
+      outputs:
+      - name: s3-file
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -eu
+
+          echo "Creating file some some awsome message ..."
+          ver=$(cat version-file/version)
+          echo "Don’t worry if it doesn’t work right.  If everything did, you’d be out of a job." > s3-file/something-v$ver.txt
+  - put: s3-file
+    params:
+      file: "s3-file/something-*.txt"
+
+- name: read-file
+  plan:
+  - get: version-file
+    passed: 
+    - create-file
+    trigger: true
+  - get: s3-file
+    passed: 
+    - create-file
+    trigger: true
+  - task: output-contents
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: czero/rootfs
+      inputs:
+      - name: version-file
+      - name: s3-file
+      run:
+        path: bash
+        args:
+        - -c
+        - |
+          set -eu
+
+          echo "Reading the contents of the file:"
+          echo
+          ver=$(cat version-file/version)
+          echo $(cat s3-file/something-v$ver.txt)
+
+resources:
+- name: s3-file
+  type: s3
+  source:
+    access_key_id: {{storage_access_key}}
+    secret_access_key: {{storage_secret_access_key}}
+    endpoint: {{storage_endpoint}}
+    bucket: {{storage_bucket}}
+    regexp: "something-v(.*).txt"
+
+- name: version-file
+  type: semver
+  source:
+    initial_version: 1.15.0
+    driver: s3
+    bucket: {{storage_bucket}}
+    key: version
+    access_key_id: {{storage_access_key}}
+    secret_access_key: {{storage_secret_access_key}}
+    endpoint: {{storage_endpoint}}

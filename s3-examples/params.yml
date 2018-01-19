@@ -1,0 +1,4 @@
+storage_access_key: # Access key credentials
+storage_secret_access_key: # Secret key for access credentials
+storage_endpoint: # S3 endpoint. example http://10.193.96.17:9000/
+storage_bucket:  # S3 storage bucket
