@@ -19,6 +19,7 @@ To make it easy to reuse Concourse pipelines that I have either created (well th
 * Azure Blobstore Integration https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/azure-blobstore-integration
 * Artifactory Integration https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/artifactory-integration
 * Various Hacks including proxy/docker repo/S3 for images etc. https://github.com/pivotalservices/concourse-pipeline-samples/tree/master/concourse-pipeline-hacks
+* Stemcell Upgrades https://github.com/sturadnidge/concourse-upgrade-stemcell
 
 
 
